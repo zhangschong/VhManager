@@ -34,6 +34,8 @@ public abstract class ViewHelper {
     final static int VIEW_HELPER_STATE_INITED = 1 << 1;//初始化标识
     final static int VIEW_HELPER_STATE_PAUSED = 1 << 2;//暂停标识
 
+    private final String mDebugTag;
+
     private IVHManager mVhManager;
     private IVhFragment mFragement;
     private int mCurrentState = VIEW_HELPER_STATE_NULL;//当前状态
@@ -41,6 +43,10 @@ public abstract class ViewHelper {
     protected Activity mActivity;
     protected UiController mUIController;
     protected Message mMessage;//跳转消息
+
+    public ViewHelper() {
+        mDebugTag = toString();
+    }
 
 
     /**
@@ -174,7 +180,7 @@ public abstract class ViewHelper {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) == VIEW_HELPER_STATE_INITED)
             return;
         addViewHelperState(VIEW_HELPER_STATE_INITED);//如果没有初始化,则初始化
-        debug(true, "init");
+        debug(true, "init", " - ", mDebugTag);
         onInit();
     }
 
@@ -182,14 +188,14 @@ public abstract class ViewHelper {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)//如果未初始化,则不执行
             return;
         removeViewHelperState(VIEW_HELPER_STATE_PAUSED);
-        debug(true, "resume");
+        debug(true, "resume", " - ", mDebugTag);
         onResume();
     }
 
     final void pause() {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)//如果未初始化,则不执行
             return;
-        debug(true, "pause");
+        debug(true, "pause", " - ", mDebugTag);
         onPause();
         addViewHelperState(VIEW_HELPER_STATE_PAUSED);
     }
@@ -202,7 +208,7 @@ public abstract class ViewHelper {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)
             return;
         removeViewHelperState(VIEW_HELPER_STATE_INITED);//如果已经初始化,则回收
-        debug(true, "recycle");
+        debug(true, "recycle", " - ", mDebugTag);
         onRecycle();
         if (null != mMessage) {
             mMessage.recycle();
@@ -337,14 +343,14 @@ public abstract class ViewHelper {
     final void saveInstanceState(Bundle outState) {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)
             return;
-        debug(true, "saveInstanceState");
+        debug(true, "saveInstanceState", " - ", mDebugTag);
         onSaveInstanceState(outState);
     }
 
     final void restoreInstanceState(Bundle savedInstanceState) {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)
             return;
-        debug(true, "viewStateRestored");
+        debug(true, "viewStateRestored", " - ", mDebugTag);
         onRestoreInstanceState(savedInstanceState);
     }
 
