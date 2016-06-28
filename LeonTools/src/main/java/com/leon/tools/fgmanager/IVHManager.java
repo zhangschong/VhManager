@@ -47,7 +47,6 @@ public interface IVHManager extends ILifeObj {
     /**
      * 将最近启动的实例,替换到最前面,如果没有则启动一个实例
      * vha->Vhb->vhb->vha->vhc (提前 vha) =结果=> vha->Vhb->vhb->vhc->vha
-     *
      */
     int LAUNCH_TYPE_BRING_LAST_TO_TOP = 4;
     /**
@@ -248,6 +247,12 @@ class VhManagerImpl implements IVHManager {
     public boolean back() {
         if (mFragmentManager.getBackStackEntryCount() > 1) {
             mFragmentManager.popBackStack();
+            mMainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    popBackStatckFrom(mFragmentManager.getBackStackEntryCount() - 1);
+                }
+            });
         } else {
             mActivity.finish();
         }
@@ -603,7 +608,7 @@ class VhFragmentCtr implements ILifeObj {
                 vh.setVhManager(manager);
                 vh.createView();
             } catch (Exception e) {
-                vh = null;
+                throw new RuntimeException(e.getMessage());
             }
         }
         return vh;

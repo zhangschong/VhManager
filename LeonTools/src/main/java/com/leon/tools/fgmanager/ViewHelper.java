@@ -357,4 +357,14 @@ public abstract class ViewHelper {
     final void removeViewHelperState(int state) {
         mCurrentState = mCurrentState & (~state);
     }
+
+
+    /**
+     * 获取VhManager
+     *
+     * @return
+     */
+    public final IVHManager getVhManager() {
+        return mVhManager;
+    }
 }
