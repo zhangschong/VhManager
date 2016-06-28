@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,7 +17,9 @@ import android.view.ViewGroup;
 import com.leon.tools.obj.AUtils;
 import com.leon.tools.obj.ILifeObj;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -177,11 +180,11 @@ class VhManagerImpl implements IVHManager {
     }
 
     static HashMap<Activity, OnFragmentCallback> STATIC_FRAGMENT_CALL_BACKS = new HashMap<>(6);
-
+    private final static int POST_DELAY_TIME1 = 100;
     private final int mLayoutId;
     private final Activity mActivity;
     private final FragmentManager mFragmentManager;
-    private final VhFragmentCtr mVhFragmentCtr = new VhFragmentCtr();
+    private final VhFragmentCtr mVhFragmentCtr;
     private final Handler mMainThreadHandler;
     private final LaunchModelManager mLaunchModelManager = new LaunchModelManager();
 
@@ -192,6 +195,13 @@ class VhManagerImpl implements IVHManager {
         mActivity = activity;
         mMainThreadHandler = mainThreadHandler;
         mLayoutId = layoutId;
+        mVhFragmentCtr = new VhFragmentCtr(mFragmentManager);
+    }
+
+    /* 整理当前的ViewHelpers,将无用的VhFg移除 */
+    private void orderViewHelpers() {
+        mMainThreadHandler.removeCallbacks(mVhStatckOrderRunnable);
+        mMainThreadHandler.postDelayed(mVhStatckOrderRunnable, POST_DELAY_TIME1);
     }
 
     @Override
@@ -235,7 +245,7 @@ class VhManagerImpl implements IVHManager {
                 @Override
                 public void run() {
                     if (vh.getFragment() != null) {
-                        mVhFragmentCtr.finishViewHelper(vh);
+                        mVhFragmentCtr.finishViewHelper(vh, false);
                         popBackStatckFrom(mFragmentManager.getBackStackEntryCount() - 1);
                     }
                 }
@@ -337,23 +347,21 @@ class VhManagerImpl implements IVHManager {
                 }
                 mVhFragmentCtr.addVhFragmentToLocalStack(fg);
             }
-            ViewHelper vh = fg.getViewHelper();
-            if (null != vh) {
+            if (fg.isLived()) {
+                ViewHelper vh = fg.getViewHelper();
                 vh.init();
-            }
-            if (null != vhDataState) {//恢复ViewHelper数据
-                if (null != vh.getMessage())
-                    vh.onRestoreMessage(vh.getMessage(), vhDataState);
-                vh.restoreInstanceState(vhDataState);
+                if (null != vhDataState) {//恢复ViewHelper数据
+                    if (null != vh.getMessage())
+                        vh.onRestoreMessage(vh.getMessage(), vhDataState);
+                    vh.restoreInstanceState(vhDataState);
+                }
             }
         }
 
         @Override
         public View onCreateView(IVhFragment fg, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            ViewHelper vh = fg.getViewHelper();
-            if (null != vh) {
-                return vh.getMainView();
-            }
+            if (fg.isLived())
+                return fg.getViewHelper().getMainView();
             return null;
         }
 
@@ -368,18 +376,14 @@ class VhManagerImpl implements IVHManager {
 
         @Override
         public void onResume(IVhFragment fg) {
-            ViewHelper vh = fg.getViewHelper();
-            if (null != vh) {
-                vh.resume();
-            }
+            if (fg.isLived())
+                fg.getViewHelper().resume();
         }
 
         @Override
         public void onPause(IVhFragment fg) {
-            ViewHelper vh = fg.getViewHelper();
-            if (null != vh) {
-                vh.pause();
-            }
+            if (fg.isLived())
+                fg.getViewHelper().pause();
         }
 
         @Override
@@ -394,11 +398,9 @@ class VhManagerImpl implements IVHManager {
 
         @Override
         public void onDestroy(IVhFragment fg) {
-            ViewHelper vh = fg.getViewHelper();
-            if (null != vh) {
-                vh.recycle();
-                mVhFragmentCtr.finishViewHelper(vh);
-            }
+            if (fg.isLived())
+                fg.getViewHelper().recycle();
+            mVhFragmentCtr.finishVhFragment(fg, true);
         }
 
         @Override
@@ -416,6 +418,12 @@ class VhManagerImpl implements IVHManager {
                 outState.putString(STORE_VH_CLS_KEY, vh.getClass().getName());
                 outState.putBundle(STORE_VH_DATA_KEY, vhDataSate);
             }
+        }
+
+        @Override
+        public void onActivityResult(IVhFragment fg, int requestCode, int resultCode, Intent data) {
+            if (fg.isLived())
+                fg.getViewHelper().onActivityResult(requestCode, resultCode, data);
         }
     };
 
@@ -564,6 +572,7 @@ class VhManagerImpl implements IVHManager {
                 mVhFragmentCtr.addVhFragmentToLocalStack(vhFg);
                 vhFg.getViewHelper().setMessage(msg);
                 startViewHelper(vhFg);
+                orderViewHelpers();
             } else {
                 super.startViewHelper(vhcls, msg);
             }
@@ -582,6 +591,7 @@ class VhManagerImpl implements IVHManager {
                 mVhFragmentCtr.addVhFragmentToLocalStack(vhFg);
                 vhFg.getViewHelper().setMessage(msg);
                 startViewHelper(vhFg);
+                orderViewHelpers();
             } else {
                 super.startViewHelper(vhcls, msg);
             }
@@ -589,15 +599,99 @@ class VhManagerImpl implements IVHManager {
     }
 
 
+    private Runnable mVhStatckOrderRunnable = new Runnable() {
+
+        private final int EMPTY_SIZE_TO_ORDER = 0;//空Fg超过这个数值后进行整理
+
+        private ArrayList<ArrayList<IVhFragment>> caculateVhFragmentLists() {
+            ArrayList<ArrayList<IVhFragment>> vhFragmentLists = new ArrayList<>(10);
+            final int fgStatckSize = mFragmentManager.getBackStackEntryCount();
+            int evhCounts = 0;//空的个数
+            ArrayList<IVhFragment> vhFragments = new ArrayList<>(20);
+            boolean isStartAddToList = false;
+            for (int i = 0; i < fgStatckSize; i++) {
+                IVhFragment vhFg = mVhFragmentCtr.getVhFragmentByKey(i);
+                if (null == vhFg || vhFg instanceof VhFragments.DialogVhFragment) {//如果是空或是弹框,则另建一个list
+                    if (evhCounts > 0) {
+                        vhFragmentLists.add(vhFragments);
+                        vhFragments = new ArrayList<>(20);
+                        evhCounts = 0;
+                    } else
+                        vhFragments.clear();
+                    isStartAddToList = false;
+                } else {
+                    if (isStartAddToList || !vhFg.isLived()) {
+                        isStartAddToList = true;
+                        vhFragments.add(vhFg);
+                        if (null == vhFg.getViewHelper())
+                            evhCounts++;
+                    }
+                }
+            }
+
+            if (evhCounts > 0)
+                vhFragmentLists.add(vhFragments);
+            return vhFragmentLists;
+        }
+
+        //整理列表中的viewhelper,向前移动
+        private void orderFgList(ArrayList<IVhFragment> vhFgs) {
+            final int size = vhFgs.size();
+            int emptyIndex = 0;
+            int hasIndex = 0;
+            for (IVhFragment fg : vhFgs) {
+                if (!fg.isLived()) {
+                    if (hasIndex <= emptyIndex)
+                        hasIndex = emptyIndex + 1;
+                    IVhFragment lFg = null;
+                    ViewHelper vh = null;
+                    while (null == vh && hasIndex < size) {
+                        lFg = vhFgs.get(hasIndex++);
+                        vh = lFg.getViewHelper();
+                    }
+                    if (null != vh) {
+                        if (!vh.isPaused())
+                            vh.pause();
+                        fg.setViewHelper(vh);
+                        vh.setFragment(fg);
+                        lFg.setViewHelper(null);
+                    } else
+                        return;
+                }
+                emptyIndex++;
+            }
+        }
+
+        @Override
+        public void run() {
+            final int vhfgStatckSize = mVhFragmentCtr.fragmentsize();
+            final int vhSize = mVhFragmentCtr.survivalFragmentSize();
+            if (vhSize < vhfgStatckSize - EMPTY_SIZE_TO_ORDER) {
+                ArrayList<ArrayList<IVhFragment>> vhFragmentLists = caculateVhFragmentLists();
+                for (ArrayList<IVhFragment> vhFgs : vhFragmentLists)
+                    orderFgList(vhFgs);
+                popBackStatckFrom(mFragmentManager.getBackStackEntryCount() - 1);
+            }
+        }
+    };
+
 }
 
 /**
  * VHmanager 的 Fragment管理部份
  */
 class VhFragmentCtr implements ILifeObj {
+    private final static int FG_CACHE_SIZE = 4;//缓存数量
+    private static LinkedList<IVhFragment> mFragmentsCache = new LinkedList<>();//缓存
+
     private ReentrantReadWriteLock.ReadLock mReadLock;
     private ReentrantReadWriteLock.WriteLock mWriteLock;
     private SparseArray<IVhFragment> mFragmentStack = new SparseArray<>();
+    private FragmentManager mFragmentManager;
+
+    VhFragmentCtr(FragmentManager fm) {
+        mFragmentManager = fm;
+    }
 
     static ViewHelper newInstanceViewHelper(Class<? extends ViewHelper> vhCls, Activity activity, IVHManager manager) {
         ViewHelper vh = null;
@@ -615,7 +709,16 @@ class VhFragmentCtr implements ILifeObj {
     }
 
     static IVhFragment newInstanceFragment(ViewHelper vh, int index, OnFragmentCallback cb) {
-        IVhFragment fg = vh.isDialog() ? new VhFragments.DialogVhFragment() : new VhFragments.VhFragment();
+        IVhFragment fg;
+        if (vh.isDialog()) {
+            fg = new VhFragments.DialogVhFragment();
+        } else {
+            synchronized (mFragmentsCache) {
+                fg = mFragmentsCache.poll();
+            }
+            if (null == fg)
+                fg = new VhFragments.VhFragment();
+        }
         fg.setIndex(index);
         fg.setViewHelper(vh);
         return fg;
@@ -716,19 +819,47 @@ class VhFragmentCtr implements ILifeObj {
         return vhFg;
     }
 
+    private void removeFragmentfromStack(IVhFragment fg) {
+        mWriteLock.lock();
+        mFragmentStack.remove(fg.getIndex());
+        mWriteLock.unlock();
+        if (mFragmentsCache.size() < FG_CACHE_SIZE) {
+            synchronized (mFragmentsCache) {
+                mFragmentsCache.add(fg);
+            }
+        }
+    }
+
     /**
      * 关闭当前的ViewHelper
      *
      * @param vh 目标ViewHelper
      */
-    void finishViewHelper(ViewHelper vh) {
-        IVhFragment vhFg = vh.getFragment();
+    void finishViewHelper(ViewHelper vh, boolean isLifeCycle) {
+        if (null == vh)
+            return;
+        IVhFragment fg = vh.getFragment();
+        if (null != fg) {
+            fg.setViewHelper(null);
+            if (isLifeCycle)//如果是正常的关闭,则移除
+                removeFragmentfromStack(fg);
+        }
         vh.removeViewHelperState(ViewHelper.VIEW_HELPER_STATE_ATTACH);
-        vhFg.setViewHelper(null);//解除Fg与连接关系
-        vh.pause();
-        vh.recycle();
+        if (!isLifeCycle) {
+            vh.pause();
+            vh.recycle();
+        }
         vh.setFragment(null);
-        VhManagerImpl.debug(true, "finishViewHelper: index-", vhFg.getIndex());
+        VhManagerImpl.debug(true, "finishViewHelper: index-", fg.getIndex());
+    }
+
+    void finishVhFragment(IVhFragment vhFg, boolean isLifeCycle) {
+        if (null == vhFg)
+            return;
+        vhFg.setViewHelper(null);
+        if (isLifeCycle)//如果是正常关闭,则移除
+            removeFragmentfromStack(vhFg);
+        finishViewHelper(vhFg.getViewHelper(), isLifeCycle);
     }
 
     @Override

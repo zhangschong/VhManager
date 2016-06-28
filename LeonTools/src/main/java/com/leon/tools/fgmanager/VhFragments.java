@@ -4,6 +4,7 @@ package com.leon.tools.fgmanager;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,11 +132,16 @@ public class VhFragments {
             super.onSaveInstanceState(outState);
         }
 
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            mCb.onActivityResult(this, requestCode, resultCode, data);
+        }
+
         /*
-        * 设置当前ViewHelper状态
-        *
-        * @param state
-        */
+                * 设置当前ViewHelper状态
+                *
+                * @param state
+                */
         private void setViewHelperState(int state) {
             mCurrentState = state;
         }
@@ -291,6 +297,8 @@ interface OnFragmentCallback {
     void onDestroy(IVhFragment fg);
 
     void onSaveInstanceState(IVhFragment fg, Bundle outState);
+
+    void onActivityResult(IVhFragment fg, int requestCode, int resultCode, Intent data);
 }
 
 

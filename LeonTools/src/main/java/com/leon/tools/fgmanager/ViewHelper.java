@@ -3,6 +3,7 @@ package com.leon.tools.fgmanager;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.View;
@@ -30,7 +31,8 @@ public abstract class ViewHelper {
 
     final static int VIEW_HELPER_STATE_NULL = 0;//处于无状态
     final static int VIEW_HELPER_STATE_ATTACH = 1;//处于与Fragment连接状态
-    final static int VIEW_HELPER_STATE_INITED = 1 << 1;//已经初始化
+    final static int VIEW_HELPER_STATE_INITED = 1 << 1;//初始化标识
+    final static int VIEW_HELPER_STATE_PAUSED = 1 << 2;//暂停标识
 
     private IVHManager mVhManager;
     private IVhFragment mFragement;
@@ -179,6 +181,7 @@ public abstract class ViewHelper {
     final void resume() {
         if ((mCurrentState & VIEW_HELPER_STATE_INITED) != VIEW_HELPER_STATE_INITED)//如果未初始化,则不执行
             return;
+        removeViewHelperState(VIEW_HELPER_STATE_PAUSED);
         debug(true, "resume");
         onResume();
     }
@@ -188,6 +191,11 @@ public abstract class ViewHelper {
             return;
         debug(true, "pause");
         onPause();
+        addViewHelperState(VIEW_HELPER_STATE_PAUSED);
+    }
+
+    boolean isPaused() {
+        return (mCurrentState & VIEW_HELPER_STATE_PAUSED) == VIEW_HELPER_STATE_PAUSED;
     }
 
     final void recycle() {
@@ -358,6 +366,10 @@ public abstract class ViewHelper {
         mCurrentState = mCurrentState & (~state);
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+
+    ;
 
     /**
      * 获取VhManager
