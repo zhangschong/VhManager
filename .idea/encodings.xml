@@ -1,6 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElementsLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElementsLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/BaseElementsLayout.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/ElementDrawView.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/ElementDrawView.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/ElementDrawView.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElementLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElementLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/IElementLayout.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PaintStyle.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PaintStyle.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PaintStyle.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElementLayout.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElementLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/PercentElementLayout.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/Zoom.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/Zoom.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/Zoom.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/GridElements.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/GridElements.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/GridElements.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KDrawNode.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KDrawNode.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KDrawNode.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KLineElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KLineElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/KLineElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/LineElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/LineElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/LineElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinElement.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinElement.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinNetBg.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinNetBg.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/MaxMinNetBg.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/VolDrawNode.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/chart/stock/VolDrawNode.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/java/com/leon/tools/guesture" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/LeonTools/src/main/res/values/dimens.xml" charset="GBK" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
